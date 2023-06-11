@@ -1,23 +1,34 @@
 from pytube import YouTube
 import tkinter as tk
 import os
-
+import threading
 global window,opt
-def callback(*args):
+
+def getterFunc(name):
     global yt,options_list,window,opt
-    link = ytI.get()
     resList = []
-    if len(link)>20:
-        yt = YouTube(link)
-        streams = yt.streams.order_by("resolution")
-        for s in streams:
-            resList.append(str(s.resolution)) 
+    link = ytI.get()
+    yt = YouTube(link)
+    print("1")
+    streams = yt.streams.order_by("resolution")
+    for s in streams:
+        resList.append(str(s.resolution)) 
     resList = list(set(resList))
     resList.sort()
     valIn.set("Choose Resolution")
     opt['menu'].delete(0, 'end')
     for r in resList:
         opt['menu'].add_command(label=r, command=tk._setit(valIn, r))
+    print("2")
+
+def callback(*args):
+    global yt,options_list,window,opt
+    link = ytI.get()
+
+    if len(link)>20:
+        x = threading.Thread(target=getterFunc, args=(1,))
+        x.start()
+        
 
 def download():
     global window,yt
@@ -36,11 +47,12 @@ def download():
         os.rename(r"music\\" + yt.title + ".mp4", new_file)
     else:
         try:
-            print(yt.streams)
+            #print(yt.streams)
             mp4_files = yt.streams.filter(resolution=res)
             mp4_files[0].download("video")
             lblErr.place_forget()
-        except:
+        except Exception as e :
+            print(e)
             errorText.set("This video has not " + res + " resolution!")
             lblErr.place(x=150,y=150)
         #print(type(mp4_files[0]))
@@ -95,6 +107,8 @@ lblErr = tk.Label(textvariable = errorText)
 lblErr.configure(bg="#7F7FFF",font=("Impact", 12))
 lblErr.place(x=150,y=150)
 lblErr.place_forget()
+
+
 
 
 tk.mainloop()

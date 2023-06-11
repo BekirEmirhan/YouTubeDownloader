@@ -1,27 +1,58 @@
 from pytube import YouTube
 import tkinter as tk
 import os
-
-global window,opt
-def callback(*args):
+import threading
+from tkinter import ttk
+global window,opt,dowbar
+percentage_of_completion=0
+prev_perc=0
+def Dcallback(stream, chunk, bytes_remaining):
+    global prev_perc,mp4_files,percentage_of_completion,dowbar
+    total_size = stream.filesize
+    total_size = stream.filesize
+    bytes_downloaded = total_size - bytes_remaining
+    prev_perc=percentage_of_completion
+    percentage_of_completion = bytes_downloaded / total_size * 100
+    print(percentage_of_completion)
+    step = percentage_of_completion-prev_perc
+    #print(percentage_of_completion-prev_perc)
+    dowbar.step(step)
+    if (percentage_of_completion >= 100):
+        dowbar['value'] = 100
+def getterFunc2(name):
+    global yt,options_list,window,opt,mp4_files
+    yt.register_on_progress_callback(Dcallback)
+    mp4_files[0].download("video")
+def getterFunc(name):
     global yt,options_list,window,opt
-    link = ytI.get()
     resList = []
-    if len(link)>20:
-        yt = YouTube(link)
-        streams = yt.streams.order_by("resolution")
-        for s in streams:
-            resList.append(str(s.resolution)) 
+    link = ytI.get()
+    yt = YouTube(link)
+    print("1")
+    streams = yt.streams.order_by("resolution")
+    for s in streams:
+        resList.append(str(s.resolution)) 
     resList = list(set(resList))
     resList.sort()
     valIn.set("Choose Resolution")
     opt['menu'].delete(0, 'end')
     for r in resList:
         opt['menu'].add_command(label=r, command=tk._setit(valIn, r))
+    print("2")
+
+def callback(*args):
+    global yt,options_list,window,opt
+    link = ytI.get()
+
+    if len(link)>20:
+        x = threading.Thread(target=getterFunc, args=(1,))
+        x.start()
+        
 
 def download():
-    global window,yt
-    
+    global window,yt,mp4_files,percentage_of_completion,prev_perc
+    percentage_of_completion=0
+    prev_perc=0
     res = valIn.get()
     control = valIn2.get()
     
@@ -36,11 +67,13 @@ def download():
         os.rename(r"music\\" + yt.title + ".mp4", new_file)
     else:
         try:
-            print(yt.streams)
+            #print(yt.streams)
             mp4_files = yt.streams.filter(resolution=res)
-            mp4_files[0].download("video")
+            x = threading.Thread(target=getterFunc2, args=(1,))
+            x.start()
             lblErr.place_forget()
-        except:
+        except Exception as e :
+            print(e)
             errorText.set("This video has not " + res + " resolution!")
             lblErr.place(x=150,y=150)
         #print(type(mp4_files[0]))
@@ -60,12 +93,15 @@ window.iconphoto(False, photo)
 linkEnt = tk.StringVar(window)
 linkEnt.trace("w",callback)
 ytI = tk.Entry(window,width=45,textvariable=linkEnt)
-ytI.place(x=50,y=200) 
+ytI.place(x=50,y=175) 
 ytI.configure(border=5,fg="#0000CD")
 
 
+dowbar=ttk.Progressbar(window,orient='horizontal',mode='determinate', length=300)
+dowbar.place(x=50,y=215)
+
 btnYt = tk.Button(window,command=download,text="Download")
-btnYt.place(x=375, y=200)
+btnYt.place(x=375, y=175)
 btnYt.configure(bg="red",border=5)
 
 
@@ -95,6 +131,7 @@ lblErr = tk.Label(textvariable = errorText)
 lblErr.configure(bg="#7F7FFF",font=("Impact", 12))
 lblErr.place(x=150,y=150)
 lblErr.place_forget()
+
 
 
 

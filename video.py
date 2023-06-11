@@ -2,8 +2,27 @@ from pytube import YouTube
 import tkinter as tk
 import os
 import threading
-global window,opt
-
+from tkinter import ttk
+global window,opt,dowbar
+percentage_of_completion=0
+prev_perc=0
+def Dcallback(stream, chunk, bytes_remaining):
+    global prev_perc,mp4_files,percentage_of_completion,dowbar
+    total_size = stream.filesize
+    total_size = stream.filesize
+    bytes_downloaded = total_size - bytes_remaining
+    prev_perc=percentage_of_completion
+    percentage_of_completion = bytes_downloaded / total_size * 100
+    print(percentage_of_completion)
+    step = percentage_of_completion-prev_perc
+    #print(percentage_of_completion-prev_perc)
+    dowbar.step(step)
+    if (percentage_of_completion >= 100):
+        dowbar['value'] = 100
+def getterFunc2(name):
+    global yt,options_list,window,opt,mp4_files
+    yt.register_on_progress_callback(Dcallback)
+    mp4_files[0].download("video")
 def getterFunc(name):
     global yt,options_list,window,opt
     resList = []
@@ -31,8 +50,9 @@ def callback(*args):
         
 
 def download():
-    global window,yt
-    
+    global window,yt,mp4_files,percentage_of_completion,prev_perc
+    percentage_of_completion=0
+    prev_perc=0
     res = valIn.get()
     control = valIn2.get()
     
@@ -49,7 +69,8 @@ def download():
         try:
             #print(yt.streams)
             mp4_files = yt.streams.filter(resolution=res)
-            mp4_files[0].download("video")
+            x = threading.Thread(target=getterFunc2, args=(1,))
+            x.start()
             lblErr.place_forget()
         except Exception as e :
             print(e)
@@ -72,12 +93,15 @@ window.iconphoto(False, photo)
 linkEnt = tk.StringVar(window)
 linkEnt.trace("w",callback)
 ytI = tk.Entry(window,width=45,textvariable=linkEnt)
-ytI.place(x=50,y=200) 
+ytI.place(x=50,y=175) 
 ytI.configure(border=5,fg="#0000CD")
 
 
+dowbar=ttk.Progressbar(window,orient='horizontal',mode='determinate', length=300)
+dowbar.place(x=50,y=215)
+
 btnYt = tk.Button(window,command=download,text="Download")
-btnYt.place(x=375, y=200)
+btnYt.place(x=375, y=175)
 btnYt.configure(bg="red",border=5)
 
 

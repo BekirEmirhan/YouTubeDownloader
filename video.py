@@ -95,7 +95,7 @@ lblErr = tk.Label(textvariable = errorText)
 lblErr.configure(bg="#7F7FFF",font=("Impact", 12))
 lblErr.place(x=150,y=150)
 lblErr.place_forget()
-
+onur
 
 
 tk.mainloop()

@@ -10,4 +10,5 @@
 3) Youtube linkini yazdıktan sonra formatı ve çözünürlüğü seçin ardından download'a bastığınızda uygulamanın bulunduğu
 yere .mp4 ise ''video'' .mp3 ise ''music'' adlı klasör oluşturacak ve oraya indirecek.
 
+4) https://github.com/BekirEmirhan && https://github.com/frynlogger
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
